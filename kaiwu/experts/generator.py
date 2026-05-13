@@ -228,9 +228,15 @@ class GeneratorExpert:
         # 需要整文件scope的任务：重构（提取函数/拆分类）或综合任务（bug+refactor）
         # 判断条件：任务需要新增类/函数，或测试要求代码行数缩短/拆分
         if self._needs_whole_file_scope(ctx, files, funcs):
-            # Retry时用targeted_fix（基于当前磁盘状态，带函数级定位）
-            if ctx.best_tests_passed > 0:
-                return self._run_targeted_fix(ctx, files)
+            # Retry时：优先尝试ReAct循环（多轮交互），fallback到targeted_fix
+            if ctx.retry_count >= 1:
+                react_result = self._try_react_loop(ctx, files)
+                if react_result:
+                    return react_result
+                # ReAct失败，如果有best_state用targeted_fix，否则再试whole_file
+                if ctx.best_tests_passed > 0:
+                    return self._run_targeted_fix(ctx, files)
+                return self._run_whole_file_refactor(ctx, files)
             # 首次attempt始终用whole_file_refactor（更稳定，t04靠这个PASS）
             return self._run_whole_file_refactor(ctx, files)
 
@@ -2584,3 +2590,73 @@ class GeneratorExpert:
                 i += 1
 
         return stubs
+
+    def _try_react_loop(self, ctx: TaskContext, files: list[str]) -> Optional[dict]:
+        """尝试用ReAct循环修复。仅LARGE模型+多文件/复杂任务时启用。
+        返回patches dict或None（表示fallback到targeted_fix）。"""
+        # 条件：只有LARGE模型才启用ReAct（小模型token消耗太大）
+        from kaiwu.core.model_capability import ModelTier, detect_model_tier
+        model_name = getattr(self.llm, 'ollama_model', '') or ''
+        ollama_url = getattr(self.llm, 'ollama_url', 'http://localhost:11434')
+        try:
+            tier = detect_model_tier(model_name, ollama_url)
+        except Exception:
+            tier = ModelTier.MEDIUM
+
+        # 所有tier都允许ReAct（小模型步数少一些）
+        # 注意：retry_count检查已移到调用方（generator.run()中 ctx.retry_count>=1 才进入此分支）
+
+        # 过滤测试文件
+        target_files = [f for f in files[:3] if "test" not in f.lower()]
+        if not target_files:
+            return None
+
+        try:
+            from kaiwu.agent.react_loop import ReactLoop
+            loop = ReactLoop(
+                llm=self.llm,
+                tools=self.tools,
+                max_steps=5 if tier == ModelTier.SMALL else (8 if tier == ModelTier.MEDIUM else 10),
+                step_timeout=120,
+            )
+            result = loop.run(ctx, target_files)
+
+            # 如果ReAct有修改文件且测试有改善，转换为patches
+            if result.final_files and result.tests_passed > ctx.best_tests_passed:
+                patches = []
+                for fpath, content in result.final_files.items():
+                    patches.append({
+                        "file": fpath,
+                        "content": content,
+                        "write_mode": "whole_file",
+                    })
+                output = {
+                    "patches": patches,
+                    "explanation": f"ReAct loop: {len(result.steps)} steps, {result.tests_passed}/{result.tests_total} tests passed",
+                }
+                ctx.generator_output = output
+                logger.info("[react] success: %d patches, %d/%d tests",
+                            len(patches), result.tests_passed, result.tests_total)
+                return output
+            else:
+                logger.info("[react] no improvement (passed=%d, best=%d), falling back",
+                            result.tests_passed, ctx.best_tests_passed)
+                # 恢复best_code_snapshot（ReAct可能改了磁盘文件）
+                if ctx.best_code_snapshot:
+                    for fname, content in ctx.best_code_snapshot.items():
+                        try:
+                            self.tools.write_file(fname, content)
+                        except Exception:
+                            pass
+                return None
+
+        except Exception as e:
+            logger.warning("[react] failed with error: %s, falling back to targeted_fix", e)
+            # 恢复best_code_snapshot
+            if ctx.best_code_snapshot:
+                for fname, content in ctx.best_code_snapshot.items():
+                    try:
+                        self.tools.write_file(fname, content)
+                    except Exception:
+                        pass
+            return None
