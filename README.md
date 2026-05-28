@@ -1,5 +1,8 @@
 # KWCode · 天工开物
 
+> 基于 [val1813/kwcode](https://github.com/val1813/kwcode) v2.1.0，
+> 在原作者回归前持续维护。欢迎原作者回归后合并回主库。
+
 <div align="center">
 
 **中国开发者的本地 Coding Agent**
