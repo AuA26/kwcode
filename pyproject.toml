@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kwcode"
-version = "2.1.0"
+version = "2.1.0.1"
 description = "KwCode - Local-model coding agent with MoE expert pipeline"
 requires-python = ">=3.10"
 readme = "README.md"
@@ -71,9 +71,9 @@ dev = [
 kwcode = "kaiwu.cli.main:app"
 
 [project.urls]
-Homepage = "https://github.com/val1813/kwcode"
-Repository = "https://github.com/val1813/kwcode"
-Issues = "https://github.com/val1813/kwcode/issues"
+Homepage = "https://github.com/AuA26/kwcode"
+Repository = "https://github.com/AuA26/kwcode"
+Issues = "https://github.com/AuA26/kwcode/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

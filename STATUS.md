@@ -1,7 +1,7 @@
 # KWCode Project Status
 
 > Path: D:\program\codeagent2604\kwcode
-> GitHub: https://github.com/val1813/kwcode
+> GitHub: https://github.com/AuA26/kwcode
 > Started: 2026-04-26
 > Goal: Local-model coding agent — maximize task completion rate via deterministic expert pipeline
 

@@ -7,7 +7,7 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/val1813/kwcode.git
+git clone https://github.com/AuA26/kwcode.git
 cd kwcode
 pip install -e ".[dev]"
 python -m pytest kaiwu/tests/ -v --ignore=kaiwu/tests/bench_tasks

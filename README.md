@@ -1,5 +1,6 @@
 # KWCode · 天工开物
-
+### 基于 [val1813/kwcode](https://github.com/val1813/kwcode) v2.1.0，
+> 在原作者回归前持续维护。欢迎原作者回归后合并回主库。
 <div align="center">
 
 **中国开发者的本地 Coding Agent**
@@ -9,19 +10,20 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey.svg)]()
-[![Multi-Platform Tests](https://github.com/val1813/kwcode/actions/workflows/test.yml/badge.svg)](https://github.com/val1813/kwcode/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/Version-2.1.0-blue.svg)]()
+[![Multi-Platform Tests](https://github.com/val1813/kwcode/actions/workflows/test.yml/badge.svg)](https://github.com/AuA26/kwcode/actions/workflows/test.yml)
+[![Version](https://img.shields.io/badge/Version-2.1.0.1-blue.svg)]()
 
 </div>
 
 ---
 
-> **v2.1.0 已发布！** ReAct多轮交互循环 + 任务失败自动重跑。Eval通过率 22%→**53%**(26/50 PASS，含Go/多文件API题)，对比v2.0.0提升141%。安装命令：
+> **v2.1.0 已发布！** ReAct多轮交互循环 + 任务失败自动重跑。Eval通过率 22%→**53%**(26/50 PASS，含Go/多文件API题)，对比v2.0.0提升141%。
 >
 > ```bash
-> pip install kwcode
-> # 国内加速
-> pip install kwcode -i https://pypi.tuna.tsinghua.edu.cn/simple
+> # 从源码安装
+> git clone https://github.com/AuA26/kwcode.git
+> cd kwcode
+> pip install -e .
 > ```
 
 ---
@@ -30,21 +32,9 @@
 
 | 日期 | 内容 |
 |------|------|
-| 05-14 | **v2.1.0** ReAct多轮交互循环(react_loop.py, 工具集read/write/run_test/grep/list_dir/submit) + 任务失败自动重跑(retry_count≥1触发ReAct) + 上下文管理(保留system+初始user+最近6轮) + 安全写入(Python语法检查+禁写测试文件+失败恢复) + **Eval 26/50 PASS (53%)**, Go题6/9通过, 多文件API题3/3全过 |
-| 05-09 | **v2.0.0** Eval驱动架构升级：自适应采样(大文件1次/小文件3次) + usage_finder调用关系传递 + bug_decomposed多bug逐类拆解 + 新文件创建(_maybe_create_missing_module) + 工程约束注入(_detect_engineering_hints) + bench诊断报告系统(bench_diagnose.py) + 3个失败测试清理 + Eval 0%→20%(3/15 PASS, +83 tests) |
-| 05-08 | **v1.9.0** 工程消化反馈：execution_feedback内循环(改完立即跑测试看结果) + 小模型自适应(8b以下只采1次) + 结构化诊断句生成(generate_diagnosis) + 精确失败归因(attribute_failures_to_files) |
-| 05-07 | **v1.8.0** 21项修复：whole_file_refactor + targeted_fix + fault_functions定位 + regression_guard + checkpoint不覆盖 + syntax免费重试 + error[-3000:]取末尾 + CJK截断 |
-| 05-07 | **v1.7.0** KAIJU架构借鉴：Generator bounded context(只传当前函数+相关测试) + 存根任务sub-task decomposition(逐函数独立实现) + DetailedLogger完整流水线日志(不截断LLM输入输出) + OpenAI兼容API检测修复(kaiwu部署器兼容) |
-| 05-07 | **v1.6.2** 执行反馈深度升级：结构化测试失败解析(parse_test_failures) + TraceCoder历史教训累积(attempt_history) + whole_file写入修复(存根任务不再patches=0) + 完整审计日志(llm_calls/node_io) + pytest -v详细输出 |
-| 05-07 | **v1.6.1** 架构收敛：删除WholeFileImplExpert/DependencyFixExpert，纯确定性机制驱动pipeline。Generator增强(upstream_constraints注入system prompt + retry_hint携带上次代码 + tier=small填空框架)。License改为Apache-2.0。513 tests green |
-| 05-07 | **v1.6.0** MoE确定性架构：GapDetector(11种GapType,零LLM) + ExecutionStateTracker(回归检测) + EnvProber(工具链/依赖自动修复) + Gate确定性优先路由 + 63个专项诊断测试 |
-| 05-06 | **v1.5.1** Hashline锚点编辑(61%输出token减少) + AdaptThink自适应推理(easy→off/hard→4096) + Fast/Slow双阶段(首次fast失败升级slow) + 三飞轮(策略统计/用户模式/SKILL提炼) + 匿名遥测(opt-in, HMAC防护) + 审计日志(`kwcode log`) + model命令 + model_capability全量接入(tier检测→ctx自适应→prompt约束) + 缩进对齐修复 |
-| 05-06 | **v1.5.0** SearchSubagent隔离搜索(独立context窗口+并行读取) + UpstreamManifest跨文件契约(AST提取签名/常量，零LLM) + PENCIL式context压缩 + Verifier跨文件一致性检查 + orchestrator run()拆分(410→253行) + CLI拆分(1861→173行) + ruff/mypy配置 |
-| 05-06 | **v1.4.0** 多语言AST支持(Go/TS/Rust/Java + ast-grep预定义模板) + FastAPI Server(SSE端口7355) + Textual TUI(`kwcode --tui`) + VSCode插件(薄客户端) + 多语言Verifier(jest/go test/cargo test/mvn test) |
-| 05-06 | **v1.3.0** EventBus事件总线 + ToolGateway权限隔离 + 错误策略路由(按error_type切换重试序列) + 认知门控(patch行数递减检测) + 3层渐进压缩 + Plan自动触发 + Worktree并行隔离 + Speculative Prefetch + SearchRouter意图感知搜索(arxiv/S2/GitHub/PyPI/Open-Meteo零key) + Wink自修复监控 |
-| 05-06 | **v1.1.0** 熔断器+智能重试(syntax/import快速熔断+scope缩小) + Gate置信度 + Verifier结构化错误 + Experience Replay(BM25历史轨迹) + Session多轮连贯 + Locator精准裁剪 |
-| 04-30 | 三层上下文架构 + SSH持久会话 + Gate/路由优化 + PCED-Lite多源聚合 + 搜索site:自动限定 + qwen3:8b 20题真实验证 + 13项bug修复 |
-| 04-29 | 5元专家体系定稿 + 15个SKILL.md渐进加载 + DAG多任务编排 + Debug Subagent + Token预算/Guardrails/可观测性 |
+| 05月28日 | **v2.1.0.1** 分支版本（日常更新维护 非正式发行内容）增加了安装本地模型时对NVIDIA显卡硬件的识别防模型内存溢出 + 修复了APIKEY无法粘贴的Bug + 修复了REPL多行被自动切割的Bug + 提高python文件处理的优先级 + 新增MySQL专家 |
+| 05月14日 | **v2.1.0** ReAct多轮交互循环(react_loop.py, 工具集read/write/run_test/grep/list_dir/submit) + 任务失败自动重跑(retry_count≥1触发ReAct) + 上下文管理(保留system+初始user+最近6轮) + 安全写入(Python语法检查+禁写测试文件+失败恢复) + **Eval 26/50 PASS (53%)**, Go题6/9通过, 多文件API题3/3全过 |
+| 05月09日 | **v2.0.0** Eval驱动架构升级：自适应采样(大文件1次/小文件3次) + usage_finder调用关系传递 + bug_decomposed多bug逐类拆解 + 新文件创建(_maybe_create_missing_module) + 工程约束注入(_detect_engineering_hints) + bench诊断报告系统(bench_diagnose.py) + 3个失败测试清理 + Eval 0%→20%(3/15 PASS, +83 tests) |
 
 详细变更见 [CHANGELOG.md](CHANGELOG.md)
 
@@ -557,11 +547,11 @@ KWCode 启动时自动加载，按任务类型注入对应规则。
 ## 开发者安装
 
 ```bash
-git clone https://github.com/val1813/kwcode.git
+git clone https://github.com/AuA26/kwcode.git
 cd kwcode
 pip install -e ".[dev]"
 python -m pytest kaiwu/tests/ -v --ignore=kaiwu/tests/bench_tasks
-# 424 tests should pass
+# 495 tests should pass
 ```
 
 ### 项目结构
@@ -677,7 +667,7 @@ extension/                   # VSCode 插件（薄客户端）
 ### 快速开始
 
 ```bash
-git clone https://github.com/val1813/kwcode.git
+git clone https://github.com/AuA26/kwcode.git
 cd kwcode
 pip install -e ".[dev]"
 python -m pytest kaiwu/tests/ -v --ignore=kaiwu/tests/bench_tasks
